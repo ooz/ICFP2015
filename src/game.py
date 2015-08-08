@@ -33,18 +33,16 @@ class Game(object):
                         commands += board.move_e()
                         commands += board.move_sw()
                         commands += board.move_w()
-                        state = 0
                         while board.unit is not None:
-                            if state % 2 == 0:
-                                commands += board.move_se()
-                            else:
+                            if board.unit.pos.y % 2 == 0:
                                 commands += board.move_sw()
-                            state += 1
+                            else:
+                                commands += board.move_se()
 
             solution = {}
             solution["problemId"] = self.ID
             solution["seed"] = ss
-            solution["tag"] = "Algo v2.2 with board update, fix 1"
+            solution["tag"] = "Algo v2.3"
             solution["solution"] = commands
             self.solutions.append(solution)
         return json.dumps(self.solutions)
@@ -62,6 +60,10 @@ class Game(object):
         return "Game(ID:%s)" % self.ID
 
 class Unit(object):
+    MV_VALID = 0    # Valid move
+    MV_LOCKED = 1   # Move would cause a lock
+    MV_INVALID = 2  # Invalid move, can't move there (out of the board etc.)
+
     def __init__(self, json_unit):
         super(Unit, self).__init__()
         self.pivot = json_cell2tuple(json_unit["pivot"])
@@ -93,10 +95,10 @@ class Unit(object):
         for m in self.members:
             try:
                 if board.get(self.pos.x + m.x, self.pos.y + m.y) in [1, 2, 3]:
-                    return False
+                    return Unit.MV_LOCKED
             except IndexError:
-                return False
-        return True
+                return Unit.MV_INVALID
+        return Unit.MV_VALID
 
     def move_e(self):
         self.pos.x = self.pos.x - 1
@@ -154,7 +156,7 @@ class Board(object):
         pad_left = (self.width - (rm.x - lm.x + 1)) / 2
         unit.pos = Cell(pad_left, pad_top)
 
-        if unit.can_be_placed(self):
+        if unit.can_be_placed(self) == Unit.MV_VALID:
             self.unit = unit
         else:
             self.finished = True
@@ -191,36 +193,45 @@ class Board(object):
     def get_adjacent(self, x, y):
         return []
 
+    # TODO: refactor movement code
+
     def move_e(self):
         if self.unit is None:
             return ""
         unit_copy = copy.deepcopy(self.unit)
         unit_copy.move_e()
-        if unit_copy.can_be_placed(self):
+        cbp = unit_copy.can_be_placed(self)
+        if cbp == Unit.MV_VALID:
             self.unit.move_e()
             return "e"
-        else:
+        elif cbp == Unit.MV_LOCKED:
             self.lock()
             return "c"
+        else:
+            return ""
 
     def move_w(self):
         if self.unit is None:
             return ""
         unit_copy = copy.deepcopy(self.unit)
         unit_copy.move_w()
-        if unit_copy.can_be_placed(self):
+        cbp = unit_copy.can_be_placed(self)
+        if cbp == Unit.MV_VALID:
             self.unit.move_w()
             return "!"
-        else:
+        elif cbp == Unit.MV_LOCKED:
             self.lock()
             return "!"
+        else:
+            return ""
 
     def move_se(self):
         if self.unit is None:
             return ""
         unit_copy = copy.deepcopy(self.unit)
         unit_copy.move_se()
-        if unit_copy.can_be_placed(self):
+        cbp = unit_copy.can_be_placed(self)
+        if cbp == Unit.MV_VALID:
             self.unit.move_se()
             return "m"
         else:
@@ -232,7 +243,8 @@ class Board(object):
             return ""
         unit_copy = copy.deepcopy(self.unit)
         unit_copy.move_sw()
-        if unit_copy.can_be_placed(self):
+        cbp = unit_copy.can_be_placed(self)
+        if cbp == Unit.MV_VALID:
             self.unit.move_sw()
             return "i"
         else:
