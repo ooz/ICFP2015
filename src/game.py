@@ -32,6 +32,7 @@ class Game(object):
                     while board.unit is not None:
                         commands += board.move_ei()
 
+                        commands += board.move_to_lowest_fill()
                         # Move down
                         commands += board.move_down()
                         #print "----------------------"
@@ -289,3 +290,9 @@ class Board(object):
         commands += self.move_w()
         return commands
 
+    def move_to_lowest_fill(self):
+        commands = ""
+        if self.unit is not None:
+            self.get_fill_level(self.unit.pos.x)
+
+        return commands
