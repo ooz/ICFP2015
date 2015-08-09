@@ -30,14 +30,13 @@ class Game(object):
                 board.spawn(unit)
                 if not board.is_finished():
                     while board.unit is not None:
-                        commands += board.move_e()
-                        commands += board.move_sw()
-                        commands += board.move_w()
-                        while board.unit is not None:
-                            if board.unit.pos.y % 2 == 0:
-                                commands += board.move_sw()
-                            else:
-                                commands += board.move_se()
+                        commands += board.move_ei()
+
+                        # Move down
+                        commands += board.move_down()
+                        #print "----------------------"
+                        #print board
+                        #print "Fill lvl: %s" % board.get_fill_level(4)
 
             solution = {}
             solution["problemId"] = self.ID
@@ -186,15 +185,37 @@ class Board(object):
             return True
         return False
 
-
     def is_finished(self):
         return self.finished
 
     def get_adjacent(self, x, y):
         return []
 
-    # TODO: refactor movement code
+    def get_fill_level(self, col):
+        for y in range(self.height):
+            if self.get(col, y) in [1]:
+                return y
+        return self.height - 1
 
+    def get(self, x, y):
+        return self._board[x][y]
+
+    def __str__(self):
+        board_copy = copy.deepcopy(self._board)
+        if self.unit:
+            for m in self.unit.members:
+                board_copy[m.x + self.unit.pos.x][m.y + self.unit.pos.y] = 2
+        buf = []
+        for y in range(self.height):
+            line = ""
+            if y % 2 == 1:
+                line = " "
+            for x in range(self.width):
+                line = line + str(board_copy[x][y]) + " "
+            buf.append(line)
+        return "\n".join(buf)
+
+    # TODO: refactor movement code
     def move_e(self):
         if self.unit is None:
             return ""
@@ -251,21 +272,20 @@ class Board(object):
             self.lock()
             return "j"
 
-    def get(self, x, y):
-        return self._board[x][y]
+    # Macro movements
+    def move_down(self):
+        commands = ""
+        while self.unit is not None:
+            if self.unit.pos.y % 2 == 0:
+                commands += self.move_sw()
+            else:
+                commands += self.move_se()
+        return commands
 
-    def __str__(self):
-        board_copy = copy.deepcopy(self._board)
-        if self.unit:
-            for m in self.unit.members:
-                board_copy[m.x + self.unit.pos.x][m.y + self.unit.pos.y] = 2
-        buf = []
-        for y in range(self.height):
-            line = ""
-            if y % 2 == 1:
-                line = " "
-            for x in range(self.width):
-                line = line + str(board_copy[x][y]) + " "
-            buf.append(line)
-        return "\n".join(buf)
+    def move_ei(self):
+        commands = ""
+        commands += self.move_e()
+        commands += self.move_sw()
+        commands += self.move_w()
+        return commands
 
