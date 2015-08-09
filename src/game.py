@@ -32,7 +32,7 @@ class Game(object):
                     while board.unit is not None:
                         commands += board.move_ei()
 
-                        commands += board.move_to_lowest_fill()
+                        #commands += board.move_to_lowest_fill_east()
                         # Move down
                         commands += board.move_down()
                         #print "----------------------"
@@ -42,7 +42,7 @@ class Game(object):
             solution = {}
             solution["problemId"] = self.ID
             solution["seed"] = ss
-            solution["tag"] = "Algo v2.3"
+            solution["tag"] = "Algo v3.1"
             solution["solution"] = commands
             self.solutions.append(solution)
         return json.dumps(self.solutions)
@@ -290,9 +290,15 @@ class Board(object):
         commands += self.move_w()
         return commands
 
-    def move_to_lowest_fill(self):
+    def move_to_lowest_fill_east(self):
         commands = ""
         if self.unit is not None:
-            self.get_fill_level(self.unit.pos.x)
+            fl = self.get_fill_level(self.unit.pos.x)
+            while (self.unit is not None) and \
+                  (self.unit.pos.x - 1 >= 0) and \
+                  (self.get_fill_level(self.unit.pos.x - 1) >= fl):
+                commands += self.move_e()
+                if self.unit is not None:
+                    fl = self.get_fill_level(self.unit.pos.x)
 
         return commands
