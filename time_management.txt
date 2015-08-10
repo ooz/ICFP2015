@@ -1,0 +1,40 @@
+Friday 2015-08-07
+
+1h 30m  Reading the task
+10m     Reading facts about hex grids:
+        http://www.gamasutra.com/blogs/HermanTulleken/20140912/225495/20_Fun_Grid_Facts_Hex_Grids.php
+10m     Write simple board class
+1h 30m  Write the linear congruential generator RNG
+30m     Writing the main program
+30m     Writing the game class: constructing the game from JSON
+
+
+Saturday 2015-08-08
+
+30m     Writing the game class: constructing the game from JSON
+30m     Writing unit operations: move
+10m     Refactoring the RNG
+10m     Updating main program
+20m     Implement source generation
+1h 50m  Implement unit spawning
+30m     Implement simple stacking of units
+5m      Write main executable
+30m     Write JSON solution generator
+40m     Write upload scripts
+1h      Improve "algorithm"
+30m     Implement board update
+30m     Write README, prepare for lightning entry
+5m      Write makefile
+5m      Packaging and lightning upload
+
+
+Sunday 2015-08-09
+
+30m     Improve information about placement/movement
+20m     Refactor algo movement code
+40m     Add new fill based movement, doesn't work with the server
+
+
+Monday 2015-08-10
+
+-
